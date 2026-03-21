@@ -3,8 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
+import type { UserRol } from '@/lib/validations/usuarios'
 
-type Rol = Database['public']['Tables']['usuarios']['Row']['rol']
+type Rol = UserRol
 
 export async function createUsuarioAction(data: {
   nombre: string

@@ -59,9 +59,12 @@ export function useToggleProductoEstado() {
     onMutate: async ({ id, estado }) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEY })
       const previous = queryClient.getQueryData<Producto[]>(QUERY_KEY)
-      queryClient.setQueryData<Producto[]>(QUERY_KEY, (old) =>
-        old?.map((p) => (p.id === id ? { ...p, estado } : p))
-      )
+      // Solo aplicar update optimista si hay datos en caché
+      if (previous) {
+        queryClient.setQueryData<Producto[]>(QUERY_KEY, (old) =>
+          old?.map((p) => (p.id === id ? { ...p, estado } : p))
+        )
+      }
       return { previous }
     },
     onError: (_err, _vars, ctx) => {
