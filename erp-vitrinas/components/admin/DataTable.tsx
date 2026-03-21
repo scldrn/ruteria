@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -18,6 +18,9 @@ interface DataTableProps<T> {
   isLoading?: boolean
   pageSize?: number
   emptyMessage?: string
+  getRowKey: (row: T) => string | number
+  onEdit?: (row: T) => void
+  onDelete?: (row: T) => void
 }
 
 const DEFAULT_PAGE_SIZE = 20
@@ -28,8 +31,14 @@ export function DataTable<T>({
   isLoading = false,
   pageSize = DEFAULT_PAGE_SIZE,
   emptyMessage = 'No hay registros',
+  getRowKey,
 }: DataTableProps<T>) {
   const [page, setPage] = useState(0)
+
+  // Resetear página cuando cambia la cantidad de datos (e.g. búsqueda/filtro)
+  useEffect(() => {
+    setPage(0)
+  }, [data.length])
 
   const totalPages = Math.ceil(data.length / pageSize)
   const pageData = data.slice(page * pageSize, (page + 1) * pageSize)
@@ -86,8 +95,8 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            pageData.map((row, i) => (
-              <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+            pageData.map((row) => (
+              <tr key={getRowKey(row)} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 {columns.map((col) => (
                   <td key={col.key} className={`px-4 py-3 text-slate-700 ${col.className ?? ''}`}>
                     {col.render(row)}
@@ -108,16 +117,18 @@ export function DataTable<T>({
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label="Página anterior"
               className="p-1 rounded hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} aria-hidden />
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page === totalPages - 1}
+              aria-label="Página siguiente"
               className="p-1 rounded hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} aria-hidden />
             </button>
           </div>
         </div>
