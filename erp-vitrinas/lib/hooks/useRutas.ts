@@ -16,8 +16,6 @@ const QUERY_KEY = ['rutas'] as const
 
 export function useRutas() {
   const supabase = createClient()
-  const queryClient = useQueryClient()
-  void queryClient // kept for consistency
   return useQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => {
@@ -62,7 +60,11 @@ export function useCreateRuta() {
             orden_visita: p.orden_visita,
           })),
         )
-        if (pdvError) throw new Error(pdvError.message)
+        if (pdvError) {
+          // Rollback compensatorio — eliminar ruta huérfana
+          await supabase.from('rutas').delete().eq('id', newId)
+          throw new Error(`Error al guardar PDVs de la ruta: ${pdvError.message}`)
+        }
       }
       return data
     },
@@ -98,6 +100,12 @@ export function useUpdateRuta() {
       if (error) throw new Error(error.message)
 
       if (pdvs !== undefined) {
+        // Leer PDVs actuales para poder restaurarlos si falla la reinserción
+        const { data: pdvsAnteriores } = await supabase
+          .from('rutas_pdv')
+          .select('pdv_id, orden_visita')
+          .eq('ruta_id', id)
+
         const { error: deleteError } = await supabase
           .from('rutas_pdv')
           .delete()
@@ -112,7 +120,19 @@ export function useUpdateRuta() {
               orden_visita: p.orden_visita,
             })),
           )
-          if (insertError) throw new Error(insertError.message)
+          if (insertError) {
+            // Rollback compensatorio — restaurar PDVs anteriores
+            if (pdvsAnteriores && pdvsAnteriores.length > 0) {
+              await supabase.from('rutas_pdv').insert(
+                pdvsAnteriores.map((p) => ({
+                  ruta_id: id,
+                  pdv_id: p.pdv_id,
+                  orden_visita: p.orden_visita,
+                })),
+              )
+            }
+            throw new Error(`Error al actualizar PDVs de la ruta: ${insertError.message}`)
+          }
         }
       }
     },

@@ -1,16 +1,13 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 
 export type Colaboradora = {
   id: string
   nombre: string
-  nombreCompleto: string
 }
 
 export function useColaboradoras() {
   const supabase = createClient()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const queryClient = useQueryClient()
   return useQuery({
     queryKey: ['colaboradoras'],
     queryFn: async () => {
@@ -24,7 +21,6 @@ export function useColaboradoras() {
       return (data ?? []).map((u) => ({
         id: u.id,
         nombre: u.nombre,
-        nombreCompleto: u.nombre,
       })) as Colaboradora[]
     },
   })
