@@ -52,6 +52,9 @@ supabase gen types typescript --local > lib/supabase/database.types.ts
 supabase start
 supabase db reset         # Reset local DB + run migrations
 supabase migration new <name>
+
+# Después de db reset: recrear usuarios de test en Supabase Auth
+npm run seed:auth         # crea admin@erp.local y colaboradora@erp.local vía API
 ```
 
 ## Supabase Local URLs
@@ -61,14 +64,16 @@ supabase migration new <name>
 - DB port: `54322`
 - Credentials in `erp-vitrinas/.env.local`
 
-### Setting roles on local users
+### Setup post db reset
 
 ```bash
-docker exec -i supabase_db_erp-vitrinas psql -U postgres -c \
-  "UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{\"rol\": \"admin\"}'::jsonb WHERE email = 'admin@erp.local'"
+supabase db reset
+npm run seed:auth    # Obligatorio: crea auth users via API (no vía SQL directo)
+npm run dev
+npx playwright test  # Todos los tests deben pasar
 ```
 
-Test admin credentials: `admin@erp.local` / `Admin1234!`
+Test credentials: `admin@erp.local` / `Admin1234!` · `colaboradora@erp.local` / `Colab1234!`
 
 ## Environment Variables
 

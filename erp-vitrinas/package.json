@@ -10,7 +10,9 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "seed:auth": "node scripts/seed-auth-users.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
