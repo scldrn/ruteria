@@ -12,6 +12,7 @@ import {
   Monitor,
   Warehouse,
   Map,
+  ClipboardList,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { logoutAction } from '@/app/actions/auth'
@@ -31,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/vitrinas', icon: Monitor, label: 'Vitrinas' },
   { href: '/admin/inventario', icon: Warehouse, label: 'Inventario' },
   { href: '/admin/rutas', icon: Map, label: 'Rutas' },
+  { href: '/admin/visitas', icon: ClipboardList, label: 'Visitas' },
   { href: '/admin/usuarios', icon: Users, label: 'Usuarios', adminOnly: true },
 ]
 

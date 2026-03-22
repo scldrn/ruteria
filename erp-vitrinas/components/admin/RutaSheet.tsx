@@ -239,6 +239,18 @@ export function RutaSheet({ open, onOpenChange, ruta }: RutaSheetProps) {
                 </select>
               </Field>
 
+              {/* Nota de reasignación — solo en modo edición */}
+              {ruta && (
+                <Field label="Nota de reasignación (opcional)" error={errors.nota_reasignacion?.message}>
+                  <textarea
+                    {...register('nota_reasignacion')}
+                    className={inputCls}
+                    placeholder="Motivo del cambio de colaboradora…"
+                    rows={2}
+                  />
+                </Field>
+              )}
+
               <Field label="Zona" error={errors.zona_id?.message}>
                 <select
                   {...register('zona_id', {

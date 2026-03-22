@@ -9,6 +9,7 @@ export const rutaSchema = z.object({
   frecuencia: z.enum(['diaria', 'semanal', 'quincenal']).default('semanal'),
   dias_visita: z.array(z.string()).default([]),
   estado: z.enum(['activa', 'inactiva']).default('activa'),
+  nota_reasignacion: z.string().optional(),
 })
 
 // Schema para los PDVs de una ruta (al guardar)

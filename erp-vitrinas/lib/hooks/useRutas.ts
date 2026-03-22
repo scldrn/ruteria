@@ -95,6 +95,7 @@ export function useUpdateRuta() {
           ...(datos.frecuencia !== undefined && { frecuencia: datos.frecuencia }),
           ...(datos.dias_visita !== undefined && { dias_visita: datos.dias_visita }),
           ...(datos.estado !== undefined && { estado: datos.estado }),
+          ...(datos.nota_reasignacion !== undefined && { nota_reasignacion: datos.nota_reasignacion }),
         })
         .eq('id', id)
       if (error) throw new Error(error.message)
