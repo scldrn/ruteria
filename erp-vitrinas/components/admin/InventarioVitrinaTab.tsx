@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useInventarioVitrina } from '@/lib/hooks/useInventarioVitrina'
 import type { InventarioVitrinaRow } from '@/lib/hooks/useInventarioVitrina'
