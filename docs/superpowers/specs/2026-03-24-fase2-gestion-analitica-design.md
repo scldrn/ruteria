@@ -37,7 +37,7 @@ Las tablas `garantias`, `compras`, `detalle_compra` y `proveedores` ya existen e
 - Botón **"Registrar garantía"** en `/campo/visita/[id]`, visible en todas las etapas de la visita (mismo patrón que `IncidenciaSheet`).
 - `GarantiaSheet` recibe como props: `visitaId`, `pdvId`, `vitrinaId`.
 - `vitrinaId` es **solo para filtrado UI**: se usa para popular el select de productos con el surtido de esa vitrina. No se almacena en `garantias` (la tabla no tiene columna `vitrina_id`). No se pasa al RPC.
-- El select de productos se popula reutilizando el hook que ya provee surtido por vitrina (verificar si existe `useSurtidoVitrina` o `useSurtidoEstandar` en `lib/hooks/` antes de crear uno nuevo en `useGarantias`).
+- El select de productos se popula con un **wrapper de solo lectura** sobre el hook existente `useSurtidoEstandar`. `useSurtidoEstandar` expone mutaciones (`addItem`, `updateCantidad`, `removeItem`) que no deben quedar accesibles en componentes de campo. `useGarantias` exporta `useSurtidoVitrina(vitrinaId)` que devuelve únicamente el array de items del surtido, sin exponer las mutations.
 - Campos del sheet: producto (select), cantidad, motivo (texto), fecha aprox de venta (date input).
 - Al guardar, el cliente genera un UUID (`garantia_id`) y llama RPC `registrar_garantia`.
 
@@ -220,6 +220,7 @@ recibir_compra(
 
 - **Idempotente:** si `compras.estado = 'recibida'`, retorna éxito sin re-insertar movimientos.
 - En transacción: por cada línea, actualiza `detalle_compra.cantidad_recibida` + inserta `movimientos_inventario` (`tipo='compra'`, `direccion='entrada'`, `destino_tipo='central'`, `cantidad = cantidad_recibida`) + actualiza `compras.estado = 'recibida'` + calcula `compras.total_real`.
+- **Nota — trigger `actualizar_inventario`:** para `tipo='compra'`, el trigger aplica `delta_central := NEW.cantidad` **incondicionalmente** basándose solo en el nombre del tipo — no inspecciona `destino_tipo`. El campo `destino_tipo='central'` se guarda solo por auditoría/reporte. No usar `origen_tipo` aquí (ese campo controla el branch de `'ajuste'`, no el de `'compra'`).
 - El check constraint `cantidad_recibida <= cantidad_pedida` ya existe en la tabla — el RPC no necesita re-validarlo.
 
 #### Remoción de `InventarioCentralSheet`
@@ -323,10 +324,13 @@ FROM visitas v
 LEFT JOIN detalle_visita dv
   ON dv.visita_id = v.id AND v.estado = 'completada'
 WHERE v.fecha_hora_inicio::date = current_date
-   OR (v.fecha_hora_inicio IS NULL AND v.created_at::date = current_date);
--- Nota: visitas planificadas del día tienen fecha_hora_inicio NULL hasta que se inician.
--- El fallback a created_at::date captura las generadas hoy por el cron.
--- El implementor debe verificar contra la lógica real del cron de generación de visitas.
+   OR (v.fecha_hora_inicio IS NULL
+       AND v.created_at::date = current_date
+       AND v.estado = 'planificada');
+-- Nota: el fallback a created_at solo aplica a visitas en estado 'planificada' (sin inicio aún).
+-- El estado 'planificada' garantiza que no se incluyan visitas canceladas o de días anteriores
+-- que aún tengan created_at de hoy por alguna razón. El implementor debe confirmar con el cron
+-- que las visitas se generan el mismo día que se planifican.
 
 -- v_stock_bajo: vitrinas donde stock < 30% del surtido estándar, por producto
 CREATE OR REPLACE VIEW v_stock_bajo AS
@@ -391,6 +395,7 @@ Todos los componentes del dashboard muestran skeletons (Tremor `Skeleton` o shad
 { vitrina_id, pdv_nombre, ventas_actual, ventas_anterior, variacion_pct }
 
 // get_reporte_visitas → Row[]
+// fecha_planificada = COALESCE(fecha_hora_inicio::date, created_at::date)
 { pdv_nombre, ruta_nombre, colaboradora_nombre, fecha_planificada, estado, motivo_no_realizada }
 
 // get_reporte_incidencias_garantias → Row[]
