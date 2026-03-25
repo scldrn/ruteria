@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync'
@@ -11,16 +11,12 @@ const HAS_SUPABASE_ENV =
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) && Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export function OfflineSyncBootstrap() {
-  if (!HAS_SUPABASE_ENV) {
-    return null
-  }
-
-  const supabase = createClient()
   const queryClient = useQueryClient()
   const { isOnline } = useOfflineSync()
+  const supabase = useMemo(() => (HAS_SUPABASE_ENV ? createClient() : null), [])
 
   useEffect(() => {
-    if (!isOnline) return
+    if (!isOnline || !supabase) return
 
     void (async () => {
       setOfflineSyncActivity({
