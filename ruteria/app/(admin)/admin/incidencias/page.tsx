@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ROLES } from '@/lib/validations/usuarios'
-import type { UserRol } from '@/lib/validations/usuarios'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 import { IncidenciasTable } from '@/components/admin/IncidenciasTable'
 
 export default async function IncidenciasPage() {
@@ -12,10 +11,8 @@ export default async function IncidenciasPage() {
 
   if (!user) redirect('/login')
 
-  const rawRol = user.app_metadata?.rol
-  if (!ROLES.includes(rawRol)) redirect('/login')
-
-  const rol = rawRol as UserRol
+  const rol = await resolveCurrentRole(supabase, user, user.app_metadata?.rol as string | undefined)
+  if (!rol) redirect('/login')
   if (!['admin', 'supervisor', 'analista'].includes(rol)) {
     redirect('/admin/dashboard')
   }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getHomeForRole } from '@/lib/auth/getHomeForRole'
-import { Button } from '@/components/ui/button'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -31,7 +31,11 @@ export default function LoginPage() {
         return
       }
 
-      const rol = data.user.app_metadata?.rol as string | undefined
+      const rol = await resolveCurrentRole(
+        supabase,
+        data.user,
+        data.user.app_metadata?.rol as string | undefined
+      )
       if (!rol) {
         setError('Tu usuario no tiene un rol configurado. Contacta al administrador.')
         await supabase.auth.signOut()
@@ -47,22 +51,75 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-[#1e293b] rounded-xl p-8 shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-bold text-slate-100 tracking-widest">RUTERIA</h1>
-          <p className="text-xs text-slate-500 mt-1">Gestión de rutas y campo</p>
+    <main
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{ background: 'var(--gray-100)' }}
+    >
+      {/* Card — mismo patrón que el resto del admin */}
+      <div
+        className="w-full max-w-sm rounded-2xl bg-white p-8"
+        style={{ border: '1px solid var(--gray-200)' }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'var(--blue-600)' }}
+          >
+            <span
+              className="text-white text-[13px] font-black"
+              style={{ fontFamily: 'var(--font-jakarta, var(--font-geist-sans))' }}
+            >
+              R
+            </span>
+          </div>
+          <div>
+            <p
+              className="text-[14px] font-bold leading-none tracking-[0.08em]"
+              style={{
+                color: 'var(--gray-900)',
+                fontFamily: 'var(--font-jakarta, var(--font-geist-sans))',
+              }}
+            >
+              RUTERIA
+            </p>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--gray-600)' }}>
+              Field Service Management
+            </p>
+          </div>
         </div>
 
+        {/* Encabezado */}
+        <div className="mb-6">
+          <h1
+            className="text-[22px] font-bold"
+            style={{
+              color: 'var(--gray-900)',
+              fontFamily: 'var(--font-jakarta, var(--font-geist-sans))',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Iniciar sesión
+          </h1>
+          <p className="text-[13px] mt-1" style={{ color: 'var(--gray-600)' }}>
+            Ingresa tus credenciales para continuar.
+          </p>
+        </div>
+
+        {/* Formulario */}
         <form
-          onSubmit={(event) => {
-            event.preventDefault()
+          onSubmit={(e) => {
+            e.preventDefault()
             void handleSubmit()
           }}
           className="space-y-4"
         >
           <div>
-            <label htmlFor="email" className="block text-xs text-slate-400 mb-1.5">
+            <label
+              htmlFor="email"
+              className="block text-[13px] font-semibold mb-1.5"
+              style={{ color: 'var(--gray-900)' }}
+            >
               Correo electrónico
             </label>
             <input
@@ -72,13 +129,32 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-[#0f172a] border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="tu@correo.com"
+              className="w-full rounded-xl px-4 py-2.5 text-[14px] outline-none transition-all"
+              style={{
+                background: 'var(--gray-100)',
+                border: '1.5px solid var(--gray-200)',
+                color: 'var(--gray-900)',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.background = 'white'
+                e.currentTarget.style.borderColor = 'var(--blue-600)'
+                e.currentTarget.style.boxShadow = '0 0 0 3px var(--blue-100)'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.background = 'var(--gray-100)'
+                e.currentTarget.style.borderColor = 'var(--gray-200)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-xs text-slate-400 mb-1.5">
+            <label
+              htmlFor="password"
+              className="block text-[13px] font-semibold mb-1.5"
+              style={{ color: 'var(--gray-900)' }}
+            >
               Contraseña
             </label>
             <input
@@ -88,23 +164,59 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-[#0f172a] border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="••••••••"
+              className="w-full rounded-xl px-4 py-2.5 text-[14px] outline-none transition-all"
+              style={{
+                background: 'var(--gray-100)',
+                border: '1.5px solid var(--gray-200)',
+                color: 'var(--gray-900)',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.background = 'white'
+                e.currentTarget.style.borderColor = 'var(--blue-600)'
+                e.currentTarget.style.boxShadow = '0 0 0 3px var(--blue-100)'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.background = 'var(--gray-100)'
+                e.currentTarget.style.borderColor = 'var(--gray-200)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
             />
           </div>
 
           {error && (
-            <p role="alert" aria-live="polite" className="text-xs text-red-400 text-center">{error}</p>
+            <p
+              role="alert"
+              aria-live="polite"
+              className="text-[13px] rounded-xl px-4 py-2.5"
+              style={{
+                color: 'oklch(0.495 0.240 27)',
+                background: 'oklch(0.577 0.245 27 / 8%)',
+                border: '1px solid oklch(0.577 0.245 27 / 18%)',
+              }}
+            >
+              {error}
+            </p>
           )}
 
-          <Button
-            type="button"
-            disabled={loading || !ready}
-            onClick={() => void handleSubmit()}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium mt-2"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl py-2.5 text-[14px] font-bold text-white transition-colors duration-150 disabled:opacity-55 disabled:cursor-not-allowed"
+            style={{
+              background: loading ? 'var(--blue-500)' : 'var(--blue-600)',
+              fontFamily: 'var(--font-jakarta, var(--font-geist-sans))',
+              marginTop: '4px',
+            }}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) e.currentTarget.style.background = 'var(--blue-700)'
+            }}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.disabled) e.currentTarget.style.background = 'var(--blue-600)'
+            }}
           >
-            {loading ? 'Iniciando sesión...' : !ready ? 'Preparando...' : 'Iniciar sesión'}
-          </Button>
+            {loading ? 'Verificando...' : 'Iniciar sesión'}
+          </button>
         </form>
       </div>
     </main>

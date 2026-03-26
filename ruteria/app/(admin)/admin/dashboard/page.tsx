@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
 import { DashboardClient } from '@/components/admin/dashboard/DashboardClient'
 import { getHomeForRole } from '@/lib/auth/getHomeForRole'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 import { createClient } from '@/lib/supabase/server'
-import { ROLES } from '@/lib/validations/usuarios'
-import type { UserRol } from '@/lib/validations/usuarios'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -13,10 +12,8 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login')
 
-  const rawRol = user.app_metadata?.rol
-  if (!ROLES.includes(rawRol)) redirect('/login')
-
-  const rol = rawRol as UserRol
+  const rol = await resolveCurrentRole(supabase, user, user.app_metadata?.rol as string | undefined)
+  if (!rol) redirect('/login')
   if (!['admin', 'supervisor', 'analista'].includes(rol)) {
     redirect(getHomeForRole(rol))
   }

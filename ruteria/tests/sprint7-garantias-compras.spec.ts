@@ -15,7 +15,7 @@ let rutaId: string
 let producto1Id: string
 
 async function loginAdmin(page: Page) {
-  await page.goto('/login')
+  await page.goto('/favicon.ico')
   await page.evaluate(() => {
     window.localStorage.clear()
     window.sessionStorage.clear()
@@ -29,7 +29,7 @@ async function loginAdmin(page: Page) {
 }
 
 async function loginColaboradora(page: Page) {
-  await page.goto('/login')
+  await page.goto('/favicon.ico')
   await page.evaluate(() => {
     window.localStorage.clear()
     window.sessionStorage.clear()

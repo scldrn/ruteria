@@ -20,12 +20,6 @@ let visitaId: string
 
 async function loginColaboradora(page: Page) {
   await page.goto('/login')
-  await page.evaluate(() => {
-    window.localStorage.clear()
-    window.sessionStorage.clear()
-  })
-  await page.context().clearCookies()
-  await page.goto('/login')
   await page.getByLabel(/correo/i).fill('colaboradora@erp.local')
   await page.getByLabel(/contraseña/i).fill('Colab1234!')
   await page.getByRole('button', { name: /iniciar sesión/i }).click()
@@ -189,8 +183,8 @@ test('iniciar visita sin requests disponibles crea draft local y sincroniza al r
 
   await page.getByRole('button', { name: /volver/i }).click()
   await page.waitForURL('/campo/ruta-del-dia')
-  await expect(page.getByText('Pendiente sync')).toBeVisible()
-
+  await expect(page.getByText('sync pendiente')).toBeVisible()
+  
   await page.unroute('**/rest/v1/**')
   await page.reload()
 
@@ -206,8 +200,8 @@ test('iniciar visita sin requests disponibles crea draft local y sincroniza al r
     })
     .toBe('en_ejecucion:started')
 
-  await expect(page.getByText('Pendiente sync')).not.toBeVisible()
-  await expect(page.getByRole('button', { name: /continuar/i }).first()).toBeVisible()
+  await expect(page.getByText('sync pendiente')).not.toBeVisible()
+  await expect(page.getByText('En curso desde').first()).toBeVisible()
 })
 
 test('marcar no realizada sin requests disponibles crea draft local y sincroniza al recuperar conexion', async ({ page }) => {
@@ -226,11 +220,11 @@ test('marcar no realizada sin requests disponibles crea draft local y sincroniza
   await page.waitForURL('/campo/ruta-del-dia')
 
   // OfflineSyncBootstrap puede intentar sincronizar mientras las rutas siguen bloqueadas,
-  // lo que marca el item como 'error' antes de que podamos leer 'Pendiente sync'.
+  // lo que marca el item como 'error' antes de que podamos leer 'sync pendiente'.
   // Verificamos que el motive aparece (offline draft aplicado) y aceptamos cualquier estado de sync.
-  await expect(page.getByText('Local cerrado por inventario anual')).toBeVisible()
+  await expect(page.getByText('Local cerrado por inventario anual').first()).toBeVisible()
   await expect(
-    page.getByText('Pendiente sync').or(page.getByText('Error sync'))
+    page.getByText('sync pendiente').or(page.getByText('error sync')).first()
   ).toBeVisible()
 
   await page.unroute('**/rest/v1/**')
@@ -248,8 +242,8 @@ test('marcar no realizada sin requests disponibles crea draft local y sincroniza
     })
     .toBe('no_realizada:Local cerrado por inventario anual')
 
-  await expect(page.getByText('Pendiente sync')).not.toBeVisible()
-  await expect(page.getByText('Local cerrado por inventario anual')).toBeVisible()
+  await expect(page.getByText('sync pendiente')).not.toBeVisible()
+  await expect(page.getByText('Local cerrado por inventario anual').first()).toBeVisible()
 })
 
 test('crear incidencia sin requests disponibles la guarda localmente y la sincroniza al recuperar conexion', async ({ page }) => {
@@ -378,7 +372,7 @@ test('cerrar visita sin requests disponibles crea cierre pendiente y sincroniza 
   await page.getByRole('button', { name: /cerrar visita/i }).click()
   await page.waitForURL('/campo/ruta-del-dia')
 
-  await expect(page.getByText('Pendiente sync')).toBeVisible()
+  await expect(page.getByText('sync pendiente')).toBeVisible()
   await expect(page.getByText('Completada', { exact: true }).first()).toBeVisible()
 
   await page.unroute('**/rest/v1/**')
@@ -402,5 +396,5 @@ test('cerrar visita sin requests disponibles crea cierre pendiente y sincroniza 
     })
     .toBe('completada:30000:1')
 
-  await expect(page.getByText('Pendiente sync')).not.toBeVisible()
+  await expect(page.getByText('sync pendiente')).not.toBeVisible()
 })

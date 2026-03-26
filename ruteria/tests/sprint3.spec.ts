@@ -121,7 +121,7 @@ test.describe('Sprint 3 — Campo', () => {
   })
 
   async function loginColaboradora(page: Page) {
-    await page.goto('/login')
+    await page.goto('/favicon.ico')
     await page.evaluate(() => {
       window.localStorage.clear()
       window.sessionStorage.clear()
@@ -206,7 +206,7 @@ test.describe('Sprint 3 — Campo', () => {
 
 test.describe('Sprint 3 — Admin', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login')
+    await page.goto('/favicon.ico')
     await page.evaluate(() => {
       window.localStorage.clear()
       window.sessionStorage.clear()

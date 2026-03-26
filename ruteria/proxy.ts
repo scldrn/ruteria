@@ -2,13 +2,15 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getHomeForRole } from '@/lib/auth/getHomeForRole'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
+import type { Database } from '@/lib/supabase/database.types'
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -39,7 +41,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
-  const rol = user?.app_metadata?.rol as string | undefined
+  const rol = await resolveCurrentRole(supabase, user, user?.app_metadata?.rol as string | undefined)
   const adminRoles = ['admin', 'supervisor', 'analista', 'compras']
 
   if (path === '/login' && user) {

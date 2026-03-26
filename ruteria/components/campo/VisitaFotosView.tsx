@@ -51,7 +51,7 @@ export function VisitaFotosView({
           },
         ])
       } catch (error) {
-      URL.revokeObjectURL(previewUrl)
+        URL.revokeObjectURL(previewUrl)
         toast.error(error instanceof Error ? error.message : 'No se pudo subir la foto')
       }
     }

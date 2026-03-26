@@ -501,6 +501,50 @@ export type Database = {
           },
         ]
       }
+      gastos_operativos: {
+        Row: {
+          colaboradora_id: string
+          comprobante_url: string | null
+          concepto: string
+          created_at: string
+          fecha: string
+          id: string
+          monto: number
+          notas: string | null
+          updated_at: string
+        }
+        Insert: {
+          colaboradora_id: string
+          comprobante_url?: string | null
+          concepto: string
+          created_at?: string
+          fecha?: string
+          id?: string
+          monto: number
+          notas?: string | null
+          updated_at?: string
+        }
+        Update: {
+          colaboradora_id?: string
+          comprobante_url?: string | null
+          concepto?: string
+          created_at?: string
+          fecha?: string
+          id?: string
+          monto?: number
+          notas?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gastos_operativos_colaboradora_id_fkey"
+            columns: ["colaboradora_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       incidencias: {
         Row: {
           created_at: string

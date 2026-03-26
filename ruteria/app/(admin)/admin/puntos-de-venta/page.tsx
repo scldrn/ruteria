@@ -74,7 +74,9 @@ export default function PuntosDeVentaPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">Puntos de Venta</h1>
-          <p className="text-sm text-slate-500 mt-1">{pdvs.length} puntos de venta</p>
+          <p className="text-sm text-slate-500 mt-1">
+            {filtered.length} {filtered.length === 1 ? 'punto' : 'puntos'} de venta
+          </p>
         </div>
         <Button className="bg-[#6366f1] hover:bg-indigo-500" onClick={() => { setEditing(null); setSheetOpen(true) }}>
           <Plus size={16} className="mr-1.5" /> Nuevo PDV

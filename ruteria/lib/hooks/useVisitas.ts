@@ -54,10 +54,10 @@ export function useVisitas(filtros: FiltrosVisitas = {}) {
           usuarios!visitas_colaboradora_id_fkey(nombre),
           cobros(monto, estado, formas_pago(nombre))
         `)
-        .gte('created_at', start)
-        .lt('created_at', end)
-        .order('created_at', { ascending: false })
-        .limit(50)
+        .gte('fecha_hora_inicio', start)
+        .lt('fecha_hora_inicio', end)
+        .order('fecha_hora_inicio', { ascending: false })
+        .limit(100)
 
       if (filtros.rutaId) q = q.eq('ruta_id', filtros.rutaId)
       if (filtros.colaboradoraId) q = q.eq('colaboradora_id', filtros.colaboradoraId)

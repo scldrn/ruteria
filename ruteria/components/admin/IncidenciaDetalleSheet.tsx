@@ -100,8 +100,14 @@ export function IncidenciaDetalleSheet({
 
       toast.success('Incidencia actualizada')
       onOpenChange(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'No se pudo actualizar la incidencia')
+    } catch (error: any) {
+      let message = 'No se pudo actualizar la incidencia'
+      if (error?.name === 'ZodError' && error.errors?.[0]) {
+        message = error.errors[0].message
+      } else if (error instanceof Error) {
+        message = error.message
+      }
+      toast.error(message)
     }
   }
 

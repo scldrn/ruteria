@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { GarantiasTable } from '@/components/admin/GarantiasTable'
 import { getHomeForRole } from '@/lib/auth/getHomeForRole'
-import { ROLES } from '@/lib/validations/usuarios'
-import type { UserRol } from '@/lib/validations/usuarios'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 
 export default async function GarantiasPage() {
   const supabase = await createClient()
@@ -13,10 +12,8 @@ export default async function GarantiasPage() {
 
   if (!user) redirect('/login')
 
-  const rawRol = user.app_metadata?.rol
-  if (!ROLES.includes(rawRol)) redirect('/login')
-
-  const rol = rawRol as UserRol
+  const rol = await resolveCurrentRole(supabase, user, user.app_metadata?.rol as string | undefined)
+  if (!rol) redirect('/login')
   if (!['admin', 'supervisor', 'analista', 'compras'].includes(rol)) {
     redirect(getHomeForRole(rol))
   }

@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs'
 import { NextResponse } from 'next/server'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
 import type { UserRol } from '@/lib/validations/usuarios'
@@ -153,7 +154,7 @@ export async function GET(request: Request) {
     return new NextResponse('Debes iniciar sesión para continuar', { status: 401 })
   }
 
-  const rol = user.app_metadata?.rol as UserRol | undefined
+  const rol = await resolveCurrentRole(supabase, user, user.app_metadata?.rol as string | undefined)
   if (!rol || !(rol in REPORTES_BY_ROLE)) {
     return forbidden()
   }

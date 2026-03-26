@@ -15,25 +15,18 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, user }: AppShellProps) {
-  const displayName = user.nombre || user.email
-
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen bg-slate-50">
-        <AppSidebar rol={user.rol} />
+      <div className="flex min-h-screen bg-background">
+        <AppSidebar rol={user.rol} user={user} />
+
+        {/* Contenido principal */}
         <div className="flex flex-col flex-1 min-w-0">
-          {/* Navbar superior */}
-          <header className="h-12 bg-[#1e293b] flex items-center justify-between px-4 shrink-0">
-            <span className="text-xs font-bold text-slate-100 tracking-widest">RUTERIA</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">{displayName}</span>
-              <div className="w-7 h-7 rounded-full bg-[#6366f1] flex items-center justify-center text-white text-xs font-semibold">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
+          <main className="flex-1 overflow-auto">
+            <div className="max-w-[1400px] mx-auto px-8 py-8">
+              {children}
             </div>
-          </header>
-          {/* Contenido */}
-          <main className="flex-1 p-6 overflow-auto">{children}</main>
+          </main>
         </div>
       </div>
     </TooltipProvider>

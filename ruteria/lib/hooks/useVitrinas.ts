@@ -5,7 +5,10 @@ import type { VitrinaFormValues } from '@/lib/validations/vitrinas'
 import { getBusinessDate } from '@/lib/dates'
 
 type Vitrina = Database['public']['Tables']['vitrinas']['Row'] & {
-  puntos_de_venta: { nombre_comercial: string; zona_id: string | null } | null
+  puntos_de_venta: { 
+    nombre_comercial: string; 
+    zonas: { nombre: string } | null 
+  } | null
 }
 
 const QUERY_KEY = ['vitrinas'] as const
@@ -17,7 +20,7 @@ export function useVitrinas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vitrinas')
-        .select('*, puntos_de_venta(nombre_comercial, zona_id)')
+        .select('*, puntos_de_venta(nombre_comercial, zonas(nombre))')
         .order('codigo')
       if (error) throw new Error(error.message)
       return data as Vitrina[]

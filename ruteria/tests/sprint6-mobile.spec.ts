@@ -16,7 +16,7 @@ let rutaId: string
 let visitaId: string
 
 async function loginColaboradora(page: Page) {
-  await page.goto('/login')
+  await page.goto('/favicon.ico')
   await page.evaluate(() => {
     window.localStorage.clear()
     window.sessionStorage.clear()

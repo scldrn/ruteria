@@ -1,4 +1,5 @@
 export const BUSINESS_TIME_ZONE = 'America/Bogota'
+const BUSINESS_WEEKDAYS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'] as const
 
 function pad(value: number): string {
   return String(value).padStart(2, '0')
@@ -27,6 +28,25 @@ export function getBusinessDate(date: Date = new Date()): string {
   }
 
   return `${year}-${month}-${day}`
+}
+
+export function getBusinessWeekday(date: Date = new Date()): (typeof BUSINESS_WEEKDAYS)[number] {
+  const formatter = new Intl.DateTimeFormat('es-CO', {
+    timeZone: BUSINESS_TIME_ZONE,
+    weekday: 'long',
+  })
+
+  const weekday = formatter
+    .format(date)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (BUSINESS_WEEKDAYS.includes(weekday as (typeof BUSINESS_WEEKDAYS)[number])) {
+    return weekday as (typeof BUSINESS_WEEKDAYS)[number]
+  }
+
+  return BUSINESS_WEEKDAYS[new Date().getUTCDay()]
 }
 
 export function addDaysToDateString(date: string, days: number): string {

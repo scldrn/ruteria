@@ -2,8 +2,7 @@ import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/admin/AppShell'
-import { ROLES } from '@/lib/validations/usuarios'
-import type { UserRol } from '@/lib/validations/usuarios'
+import { resolveCurrentRole } from '@/lib/auth/resolveCurrentRole'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +15,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   if (!user) redirect('/login')
 
-  // Validar que el rol en app_metadata sea un valor conocido
-  const rawRol = user.app_metadata?.rol
-  if (!ROLES.includes(rawRol)) redirect('/login')
-  const rol = rawRol as UserRol
+  const rol = await resolveCurrentRole(supabase, user, user.app_metadata?.rol as string | undefined)
+  if (!rol) redirect('/login')
 
   // Obtener nombre desde public.usuarios
   const { data: perfil } = await supabase

@@ -13,48 +13,70 @@ export function ReportesClient({ rol }: { rol: UserRol }) {
   const esCompras = rol === 'compras'
 
   return (
-    <main className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(245,158,11,0.13),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_28%),linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-6 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.75)]">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Centro de Reportes</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-              Consultas exportables para operar, auditar y decidir
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              Filtra bajo demanda, revisa el resultado en pantalla y exporta a Excel cuando necesites compartir o
-              profundizar el análisis fuera del sistema.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600">
-            {esCompras ? <PackageSearch size={16} /> : <FileBarChart2 size={16} />}
-            {esCompras ? 'Vista enfocada en abastecimiento' : 'Operación multiárea'}
-          </div>
+    <div className="space-y-6">
+      {/* Header de página */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: 'var(--gray-600)' }}
+          >
+            Centro de Reportes
+          </p>
+          <h1
+            className="mt-1 text-[26px] font-bold"
+            style={{
+              color: 'var(--gray-900)',
+              fontFamily: 'var(--font-jakarta, var(--font-geist-sans))',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Consultas y exportaciones
+          </h1>
         </div>
-      </section>
 
+        <div
+          className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium"
+          style={{
+            borderColor: 'var(--gray-200)',
+            background: 'white',
+            color: 'var(--gray-600)',
+          }}
+        >
+          {esCompras ? <PackageSearch size={14} /> : <FileBarChart2 size={14} />}
+          {esCompras ? 'Vista de abastecimiento' : 'Operación multiárea'}
+        </div>
+      </div>
+
+      {/* Tabs */}
       <Tabs defaultValue={esCompras ? 'inventario' : 'ventas'} className="space-y-4">
-        <TabsList className="h-auto w-full justify-start gap-1 rounded-[1.2rem] border border-slate-200 bg-white p-2">
+        <TabsList
+          className="h-auto w-full justify-start gap-1 p-1.5"
+          style={{
+            background: 'white',
+            border: '1px solid var(--gray-200)',
+            borderRadius: '0.75rem',
+          }}
+        >
           {!esCompras && (
             <>
-              <TabsTrigger value="ventas" className="rounded-xl px-4 py-2.5">
+              <TabsTrigger value="ventas" className="rounded-lg px-4 py-2 text-[13px]">
                 Ventas
               </TabsTrigger>
-              <TabsTrigger value="ranking" className="rounded-xl px-4 py-2.5">
+              <TabsTrigger value="ranking" className="rounded-lg px-4 py-2 text-[13px]">
                 Ranking vitrinas
               </TabsTrigger>
             </>
           )}
-          <TabsTrigger value="inventario" className="rounded-xl px-4 py-2.5">
+          <TabsTrigger value="inventario" className="rounded-lg px-4 py-2 text-[13px]">
             Inventario
           </TabsTrigger>
           {!esCompras && (
             <>
-              <TabsTrigger value="visitas" className="rounded-xl px-4 py-2.5">
+              <TabsTrigger value="visitas" className="rounded-lg px-4 py-2 text-[13px]">
                 Visitas
               </TabsTrigger>
-              <TabsTrigger value="incidencias" className="rounded-xl px-4 py-2.5">
+              <TabsTrigger value="incidencias" className="rounded-lg px-4 py-2 text-[13px]">
                 Incidencias / Garantías
               </TabsTrigger>
             </>
@@ -89,6 +111,6 @@ export function ReportesClient({ rol }: { rol: UserRol }) {
           </TabsContent>
         )}
       </Tabs>
-    </main>
+    </div>
   )
 }

@@ -23,7 +23,10 @@ import { useVitrinas, useRetirarVitrina } from '@/lib/hooks/useVitrinas'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Vitrina = Database['public']['Tables']['vitrinas']['Row'] & {
-  puntos_de_venta: { nombre_comercial: string; zona_id: string | null } | null
+  puntos_de_venta: { 
+    nombre_comercial: string; 
+    zonas: { nombre: string } | null 
+  } | null
 }
 
 // Mapa de colores para el badge de estado
@@ -94,7 +97,11 @@ export default function VitrinasPage() {
       {
         key: 'zona',
         header: 'Zona',
-        render: (v) => v.puntos_de_venta?.zona_id ?? '—',
+        render: (v) => {
+          const z = v.puntos_de_venta?.zonas
+          const zona = Array.isArray(z) ? z[0] : z
+          return zona?.nombre ?? '—'
+        },
       },
       {
         key: 'estado',

@@ -15,44 +15,61 @@ export function DashboardClient() {
   const isLoadingTendencias = ventas30dias.isLoading || ventasPorRuta.isLoading
 
   return (
-    <main className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_34%),linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] p-6 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.75)]">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Dashboard Ejecutivo</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Lectura viva de la operación comercial</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              KPIs, tendencias y vitrinas críticas en una sola superficie para decidir rápido y corregir antes de que
-              el problema escale.
-            </p>
-          </div>
-
-          <div
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium ${
-              realtimeHealthy
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                : 'border-amber-200 bg-amber-50 text-amber-700'
-            }`}
+    <div className="space-y-6">
+      {/* Header de página */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: 'var(--gray-600)' }}
           >
-            {realtimeHealthy ? <Signal size={16} /> : <WifiOff size={16} />}
-            {realtimeHealthy ? 'En vivo' : 'Fallback cada 30s'}
-          </div>
+            Dashboard Ejecutivo
+          </p>
+          <h1
+            className="mt-1 text-[26px] font-bold"
+            style={{
+              color: 'var(--gray-900)',
+              fontFamily: 'var(--font-jakarta, var(--font-geist-sans))',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Operación comercial
+          </h1>
         </div>
 
-        <div className="mt-6">
-          <KpiCards data={kpis.data} isLoading={kpis.isLoading} />
+        <div
+          className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium"
+          style={
+            realtimeHealthy
+              ? { borderColor: 'oklch(0.850 0.060 145)', background: 'oklch(0.958 0.040 145)', color: 'oklch(0.420 0.140 145)' }
+              : { borderColor: 'oklch(0.928 0.08 75)', background: 'oklch(0.975 0.022 85)', color: 'oklch(0.520 0.18 65)' }
+          }
+        >
+          {realtimeHealthy ? <Signal size={14} /> : <WifiOff size={14} />}
+          {realtimeHealthy ? 'En vivo' : 'Fallback cada 30s'}
         </div>
-      </section>
+      </div>
 
+      {/* KPI cards */}
+      <KpiCards data={kpis.data} isLoading={kpis.isLoading} />
+
+      {/* Tabs */}
       <Tabs defaultValue="hoy" className="space-y-4">
-        <TabsList className="h-auto w-full justify-start gap-1 rounded-[1.2rem] border border-slate-200 bg-white p-2">
-          <TabsTrigger value="hoy" className="rounded-xl px-4 py-2.5">
+        <TabsList
+          className="h-auto w-full justify-start gap-1 p-1.5"
+          style={{
+            background: 'white',
+            border: '1px solid var(--gray-200)',
+            borderRadius: '0.75rem',
+          }}
+        >
+          <TabsTrigger value="hoy" className="rounded-lg px-4 py-2 text-[13px]">
             Hoy
           </TabsTrigger>
-          <TabsTrigger value="tendencias" className="rounded-xl px-4 py-2.5">
+          <TabsTrigger value="tendencias" className="rounded-lg px-4 py-2 text-[13px]">
             Tendencias
           </TabsTrigger>
-          <TabsTrigger value="vitrinas" className="rounded-xl px-4 py-2.5">
+          <TabsTrigger value="vitrinas" className="rounded-lg px-4 py-2 text-[13px]">
             Vitrinas
           </TabsTrigger>
         </TabsList>
@@ -81,6 +98,6 @@ export function DashboardClient() {
           />
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   )
 }

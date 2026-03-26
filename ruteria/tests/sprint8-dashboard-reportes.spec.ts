@@ -2,12 +2,6 @@ import { expect, test, type Page } from '@playwright/test'
 
 async function loginAdmin(page: Page) {
   await page.goto('/login')
-  await page.evaluate(() => {
-    window.localStorage.clear()
-    window.sessionStorage.clear()
-  })
-  await page.context().clearCookies()
-  await page.goto('/login')
   await page.getByLabel(/correo/i).fill('admin@erp.local')
   await page.getByLabel(/contraseña/i).fill('Admin1234!')
   await page.getByRole('button', { name: /iniciar sesión/i }).click()
@@ -22,12 +16,12 @@ test.describe('Sprint 8 - Dashboard', () => {
   test('carga KPIs y tabs principales', async ({ page }) => {
     await page.goto('/admin/dashboard')
 
-    await expect(page.getByRole('heading', { name: /lectura viva de la operación comercial/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /operación comercial/i })).toBeVisible()
     await expect(page.getByText('Ventas Hoy', { exact: true })).toBeVisible()
     await expect(page.getByText('Cobros del Mes', { exact: true })).toBeVisible()
-    await expect(page.getByText('Visitas', { exact: true })).toBeVisible()
+    await expect(page.getByRole('main').getByText('Visitas', { exact: true })).toBeVisible()
     await expect(page.getByText('Incidencias Abiertas', { exact: true })).toBeVisible()
-    await expect(page.getByText(/incidencias abiertas recientes/i)).toBeVisible()
+    await expect(page.getByText(/incidencias recientes/i)).toBeVisible()
 
     await page.getByRole('tab', { name: /tendencias/i }).click()
     await expect(page.getByRole('tab', { name: /tendencias/i })).toHaveAttribute('data-state', 'active')
@@ -43,7 +37,7 @@ test.describe('Sprint 8 - Reportes', () => {
   test('carga la página y permite navegar tabs', async ({ page }) => {
     await page.goto('/admin/reportes')
 
-    await expect(page.getByRole('heading', { name: /consultas exportables para operar, auditar y decidir/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /consultas y exportaciones/i })).toBeVisible()
     await expect(page.getByRole('tab', { name: /ventas/i })).toBeVisible()
 
     await page.getByRole('tab', { name: /ranking vitrinas/i }).click()

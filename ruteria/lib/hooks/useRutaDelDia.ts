@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import { getBusinessDate, getBusinessDayUtcRange } from '@/lib/dates'
+import { getBusinessDate, getBusinessDayUtcRange, getBusinessWeekday } from '@/lib/dates'
 import { applyVisitDraftToRoute, listVisitDrafts } from '@/lib/offline/drafts'
 import { isProbablyOfflineError } from '@/lib/offline/network'
 import { getRouteSnapshot, saveRouteSnapshot } from '@/lib/offline/snapshots'
@@ -51,6 +51,25 @@ type RawVisita = {
   rutas: RutasEntry | RutasEntry[] | null
 }
 
+type RutaProgramada = {
+  id: string
+  nombre: string
+  colaboradora_id: string | null
+  rutas_pdv: Array<{ pdv_id: string; orden_visita: number }> | null
+}
+
+type PdvActivo = {
+  id: string
+  nombre_comercial: string
+  direccion: string | null
+  activo: boolean
+}
+
+type VitrinaActiva = {
+  id: string
+  pdv_id: string
+}
+
 // PostgREST may return a single object or an array for joined relations
 function firstOrNull<T>(value: T | T[] | null): T | null {
   if (value === null || value === undefined) return null
@@ -79,6 +98,75 @@ function mapRow(v: RawVisita): VisitaDelDia {
   }
 }
 
+async function ensureTodayVisits(userId: string, start: string, end: string) {
+  const supabase = createClient()
+  const weekday = getBusinessWeekday()
+
+  const { data: rutas, error: rutasError } = await supabase
+    .from('rutas')
+    .select('id, nombre, colaboradora_id, rutas_pdv(pdv_id, orden_visita)')
+    .eq('estado', 'activa')
+    .eq('colaboradora_id', userId)
+    .contains('dias_visita', [weekday])
+
+  if (rutasError) throw new Error(rutasError.message)
+  if (!rutas || rutas.length === 0) return
+
+  const programmedRoutes = rutas as RutaProgramada[]
+  const pdvIds = Array.from(
+    new Set(
+      programmedRoutes.flatMap((ruta) => (ruta.rutas_pdv ?? []).map((rp) => rp.pdv_id))
+    )
+  )
+
+  if (pdvIds.length === 0) return
+
+  const [{ data: pdvs, error: pdvsError }, { data: vitrinas, error: vitrinasError }, { data: existing, error: existingError }] =
+    await Promise.all([
+      supabase
+        .from('puntos_de_venta')
+        .select('id, nombre_comercial, direccion, activo')
+        .in('id', pdvIds)
+        .eq('activo', true),
+      supabase
+        .from('vitrinas')
+        .select('id, pdv_id')
+        .in('pdv_id', pdvIds)
+        .eq('estado', 'activa'),
+      supabase
+        .from('visitas')
+        .select('pdv_id')
+        .eq('colaboradora_id', userId)
+        .gte('created_at', start)
+        .lt('created_at', end),
+    ])
+
+  if (pdvsError) throw new Error(pdvsError.message)
+  if (vitrinasError) throw new Error(vitrinasError.message)
+  if (existingError) throw new Error(existingError.message)
+
+  const activePdvs = new Map((pdvs as PdvActivo[] | null ?? []).map((pdv) => [pdv.id, pdv]))
+  const activeVitrinasByPdv = new Map((vitrinas as VitrinaActiva[] | null ?? []).map((vitrina) => [vitrina.pdv_id, vitrina]))
+  const existingPdvIds = new Set((existing ?? []).map((visita) => visita.pdv_id))
+
+  const missingVisits = programmedRoutes.flatMap((ruta) =>
+    (ruta.rutas_pdv ?? [])
+      .filter((rp) => activePdvs.has(rp.pdv_id) && activeVitrinasByPdv.has(rp.pdv_id) && !existingPdvIds.has(rp.pdv_id))
+      .map((rp) => ({
+        ruta_id: ruta.id,
+        pdv_id: rp.pdv_id,
+        vitrina_id: activeVitrinasByPdv.get(rp.pdv_id)!.id,
+        colaboradora_id: userId,
+        estado: 'planificada' as const,
+      }))
+  )
+
+  if (missingVisits.length === 0) return
+
+  const { error: insertError } = await supabase.from('visitas').insert(missingVisits)
+  if (insertError) throw new Error(insertError.message)
+}
+
 export function useRutaDelDia() {
   const supabase = createClient()
   const todayKey = getBusinessDate()
@@ -88,6 +176,15 @@ export function useRutaDelDia() {
     queryFn: async (): Promise<RutaDelDiaResult> => {
       try {
         const { start, end } = getBusinessDayUtcRange()
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
+
+        if (userError) throw new Error(userError.message)
+        if (!user) throw new Error('Debes iniciar sesión para ver tu ruta del día')
+
+        await ensureTodayVisits(user.id, start, end)
 
         const [planificadas, activas, noRealizadas] = await Promise.all([
           supabase
