@@ -2,9 +2,9 @@
 
 # ruteria
 
-**A field service management platform for consignment retail networks**
+**Field service management platform for consignment retail networks**
 
-Built to manage the full visit workflow across **200+ retail locations**: routes, inventory counts, collections, replenishment, and admin oversight.
+Manages the full visit workflow across **200+ retail locations** — routes, inventory counts, collections, replenishment, and admin oversight — replacing a fully manual operation.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
@@ -14,106 +14,118 @@ Built to manage the full visit workflow across **200+ retail locations**: routes
 
 </div>
 
+---
+
 ## Overview
 
-`ruteria` is a production-style FSM platform for a consignment business operating physical display cases inside third-party stores.
+`ruteria` is a production-grade ERP-CRM system for a consignment business that places electronic accessory display cases in third-party retail stores. Field workers visit each store daily to count inventory, collect payments, and restock.
 
-It replaces manual coordination with a structured system for:
+The platform provides:
 
-- route planning and daily field execution
-- inventory counting and inferred sales
-- payment registration and discrepancy handling
-- replenishment from central stock to field staff to display cases
-- admin visibility into visits, stock, guarantees, purchasing, and analytics
+- **Route planning** — assign and reorder daily store visits per collaborator
+- **Visit execution** — inventory counting with automatic sales inference (`units_sold = prev_stock - current_stock`)
+- **Payment capture** — amount registration with discrepancy detection and mandatory notes
+- **Replenishment** — central stock to field staff to display case, tracked via immutable movements
+- **Admin panel** — dashboards, exportable reports, purchase management, incident tracking
 
-This is one of my strongest portfolio projects because it combines product thinking, operational domain modeling, backend integrity, and end-to-end ownership.
+## Tech Stack
 
-## Highlights
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui |
+| State | Zustand (global) + TanStack React Query v5 (server cache) |
+| Backend | Supabase (PostgreSQL + PostgREST + Edge Functions on Deno) |
+| Auth | Supabase Auth with JWT + Row Level Security per role |
+| Storage | Supabase Storage (private bucket for visit photos) |
+| Realtime | Supabase Realtime websockets (live dashboard updates) |
+| Validation | Zod + React Hook Form |
+| Testing | Playwright (e2e) + Vitest (unit) |
+| Hosting | Vercel + Supabase Cloud |
 
-- Mobile-first workflow for field collaborators
-- Role-based admin and field experiences
-- SQL triggers and RPCs for transactional inventory logic
-- Offline-first field execution with sync queue and image compression
-- Dashboard and exportable reports for operational analytics
-- Server-side Excel export flow backed by `exceljs`
-- Automated coverage with Playwright, Vitest, and CI checks
+## Roles
 
-## Stack
+| Role | Access |
+|---|---|
+| `admin` | Full admin panel — all entities and configuration |
+| `colaboradora` | Mobile field view — her assigned route only |
+| `supervisor` | Admin panel — routes, visits, incidents, partial reports |
+| `analista` | Admin panel — read-only dashboards and exports |
+| `compras` | Admin panel — suppliers, purchases, central inventory |
 
-- Next.js 16
-- React 19
-- TypeScript
-- Supabase
-- PostgreSQL
-- Tailwind CSS v4
-- TanStack React Query
-- Playwright
-- Vitest
+## Features
 
-## Current Scope
+**Field (mobile-first)**
+- Route of the day with ordered store list and visit status
+- Start visit: shows previous inventory per product
+- Inventory count with automatic units-sold calculation
+- Payment capture with discrepancy handling and photo attachment
+- Offline execution with background sync queue and image compression
 
-Implemented in the current release candidate through Fase 2:
+**Admin (desktop)**
+- Dashboard: monthly collections, low-stock alerts, open incidents
+- Visit overview: planned vs. completed per route
+- Temporary route reassignment with reason and date
+- Supplier and purchase management with reception flow
+- Exportable reports: sales, ranking, inventory, visits, incidents
 
-- auth and role-based routing
-- products, categories, users, routes, and points of sale
-- display cases and central inventory
-- route-of-the-day and visit execution
-- counting, payment capture, replenishment, guarantees, incidences, photos, and transactional visit closing
-- supplier and purchase management with reception flow
-- dashboard with monthly collections, low-stock visibility, and open-incidence feed
-- exportable reports for sales, ranking, inventory, visits, and incidences/guarantees
-
-Release hardening included:
-
-- coherent role home routing, including `compras`
-- at least one final display-case photo required to complete a visit
-- local Supabase reset + auth seeding + type generation workflow
-- CI pipeline and release checklist for commercial readiness
+**Infrastructure**
+- SQL triggers for transactional inventory integrity (no negative stock)
+- Immutable inventory movement log; stock denormalized via triggers
+- Server-side Excel export via `exceljs`
+- CI pipeline with lint, type-check, build, and e2e gates
 
 ## Local Setup
 
+**Prerequisites:** Node.js 20+, Supabase CLI, Docker
+
 ```bash
 git clone https://github.com/scldrn/ruteria.git
-cd ruteria
-cd ruteria
+cd ruteria/ruteria
 
 npm install
-npm run db:start
-./scripts/export-supabase-env.sh dotenv > .env.local
+supabase start
+cp .env.example .env.local   # fill in values from `supabase status`
 npm run db:reset
-npm run seed:auth
+npm run seed:auth             # creates auth users via API
 npm run dev
 ```
 
-Main app: `http://localhost:3000`
+App runs at `http://localhost:3000`
 
-Repository root: `ruteria/`
+**Test credentials:**
 
-App workspace: `ruteria/ruteria/`
+| Email | Password | Role |
+|---|---|---|
+| `admin@erp.local` | `Admin1234!` | admin |
+| `colaboradora@erp.local` | `Colab1234!` | colaboradora |
 
 ## Quality Checks
 
 ```bash
-npm run ci:checks
-npm run audit:prod
-npm run type-check
 npm run lint
+npm run type-check
 npm test
 npm run build
 npm run test:e2e
 ```
 
-Release gate details live in `RELEASE_CANDIDATE_CHECKLIST.md`.
+All gates must pass before merging to `main`. See `RELEASE_CANDIDATE_CHECKLIST.md` for the full release gate.
 
-## Repository
+## Repository Structure
 
-- `ruteria/`: main application workspace
-- `docs/`: sprint and implementation docs
-- `SPRINTS.md`: delivery history
-- `ERP_CRM_Plan_v2.md`: master product plan aligned to the shipped scope
-- `RELEASE_CANDIDATE_CHECKLIST.md`: commercial release gate
-- `DEPLOYMENT_RUNBOOK.md`: staging/production promotion and rollback guide
-- `CLAUDE.md`: repo conventions
+```
+ruteria/                        # repo root — planning and delivery docs
+├── ruteria/                    # Next.js application workspace
+│   ├── app/                    # routes — (admin)/* and (campo)/*
+│   ├── components/             # feature and UI components
+│   ├── lib/                    # hooks, helpers, validations, Supabase clients
+│   ├── supabase/               # migrations and Edge Functions
+│   └── tests/                  # Playwright e2e specs
+├── ERP_CRM_Plan_v2.md          # master product plan
+├── SPRINTS.md                  # delivery history
+├── RELEASE_CANDIDATE_CHECKLIST.md
+└── DEPLOYMENT_RUNBOOK.md       # staging/production promotion and rollback
+```
 
 ## License
 
