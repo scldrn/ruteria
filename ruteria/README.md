@@ -1,46 +1,41 @@
-# ruteria app
+# ruteria — app workspace
 
-Main application workspace for [ruteria](../README.md).
+Next.js 16 application for [ruteria](../README.md). This is the main workspace with all application code, migrations, and tests.
 
-## What is here
+## Structure
 
-- Next.js 16 App Router app
-- admin and field workflows
-- Supabase migrations and Edge Functions
-- dashboard, reports, guarantees, suppliers, and purchases
-- Playwright and Vitest tests
+| Folder | Purpose |
+|---|---|
+| `app/` | Next.js App Router pages — `(admin)/*` and `(campo)/*` route groups |
+| `components/` | Feature and UI components |
+| `lib/` | Hooks, helpers, validations, Supabase clients |
+| `supabase/` | SQL migrations and Edge Functions (Deno) |
+| `tests/` | Playwright end-to-end specs |
 
-## Main folders
-
-- `app/`: routes
-- `components/`: feature and UI components
-- `lib/`: hooks, helpers, validations, Supabase clients
-- `supabase/`: migrations and functions
-- `tests/`: end-to-end coverage
-
-## Run locally
+## Local setup
 
 ```bash
 cd ruteria
 
 npm install
-npm run db:start
-./scripts/export-supabase-env.sh dotenv > .env.local
+supabase start
+cp .env.example .env.local   # fill in values from `supabase status`
 npm run db:reset
-npm run seed:auth
+npm run seed:auth             # creates test users via API
 npm run dev
 ```
+
+App runs at `http://localhost:3000`
 
 ## Commands
 
 ```bash
-npm run dev
-npm run dev:host
-npm run build
-npm run lint
-npm run type-check
-npm test
-npm run test:e2e
-npm run ci:checks
-npm run audit:prod
+npm run dev            # start dev server
+npm run build          # production build
+npm run lint           # ESLint
+npm run type-check     # TypeScript (no emit)
+npm test               # Vitest unit tests
+npm run test:e2e       # Playwright e2e tests
+npm run ci:checks      # lint + type-check + build
+npm run seed:auth      # recreate auth users after db:reset
 ```
