@@ -1,3 +1,4 @@
+// All date/time operations use Colombia time (UTC-5) as the business reference
 export const BUSINESS_TIME_ZONE = 'America/Bogota'
 const BUSINESS_WEEKDAYS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'] as const
 
