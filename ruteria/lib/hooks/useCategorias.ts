@@ -5,6 +5,7 @@ import type { CategoriaFormValues } from '@/lib/validations/categorias'
 
 type Categoria = Database['public']['Tables']['categorias']['Row']
 
+// Clave compartida para invalidar todas las queries de categorías en mutaciones
 const QUERY_KEY = ['categorias'] as const
 
 export function useCategorias() {
