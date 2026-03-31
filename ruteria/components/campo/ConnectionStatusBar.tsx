@@ -45,7 +45,7 @@ export function ConnectionStatusBar({
       <div className="flex items-center justify-between gap-3">
         <span className="font-medium">
           {isCheckingConnection
-            ? 'Verificando conexion'
+            ? 'Verificando conexión'
             : hasSyncErrors
             ? 'Error al sincronizar'
             : isSyncing
@@ -53,8 +53,8 @@ export function ConnectionStatusBar({
             : hasPendingSync
             ? 'Pendiente por sincronizar'
             : isOnline
-            ? 'En linea'
-            : 'Sin conexion'}
+            ? 'En línea'
+            : 'Sin conexión'}
         </span>
         {isOfflineCapable && <span className="text-[11px] opacity-80">Modo offline disponible</span>}
       </div>
@@ -67,7 +67,7 @@ export function ConnectionStatusBar({
       {isOfflineFallback && (
         <p className="mt-1">
           Mostrando datos guardados en este dispositivo
-          {formattedSyncTime ? ` · ultima sincronizacion ${formattedSyncTime}` : ''}
+          {formattedSyncTime ? ` · última sincronización ${formattedSyncTime}` : ''}
         </p>
       )}
       {!isCheckingConnection && !isOnline && !isOfflineFallback && (
