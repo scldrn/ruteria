@@ -136,7 +136,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Quick reference:
 main ──────────────────────────────── production  (protected)
      ↑ release/sprint-N  ↑ hotfix/*
 develop ────────────────────────────── integration (protected)
-     ↑ feature/S3-foo  ↑ feature/S3-bar
+     ↑ feature/SN-foo  ↑ feature/SN-bar
 ```
 
 **Feature workflow:** branch from `develop` → PR to `develop` → sprint release → `main`
