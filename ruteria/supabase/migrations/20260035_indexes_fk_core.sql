@@ -17,12 +17,9 @@ CREATE INDEX IF NOT EXISTS idx_detalle_visita_visita_id
 CREATE INDEX IF NOT EXISTS idx_detalle_visita_producto_id
   ON detalle_visita(producto_id);
 
--- cobros: joins en reportes y dashboard
+-- cobros: join principal es por visita_id (colaboradora_id no existe en esta tabla)
 CREATE INDEX IF NOT EXISTS idx_cobros_visita_id
   ON cobros(visita_id);
-
-CREATE INDEX IF NOT EXISTS idx_cobros_colaboradora_id
-  ON cobros(colaboradora_id);
 
 -- movimientos_inventario: consultas de inventario y triggers
 CREATE INDEX IF NOT EXISTS idx_movimientos_producto_id
@@ -34,8 +31,9 @@ CREATE INDEX IF NOT EXISTS idx_movimientos_origen_id
 CREATE INDEX IF NOT EXISTS idx_movimientos_destino_id
   ON movimientos_inventario(destino_id);
 
-CREATE INDEX IF NOT EXISTS idx_movimientos_visita_id
-  ON movimientos_inventario(visita_id);
+-- referencia_id es el FK a visitas/compras/etc (visita_id no existe en esta tabla)
+CREATE INDEX IF NOT EXISTS idx_movimientos_referencia_id
+  ON movimientos_inventario(referencia_id);
 
 -- incidencias
 CREATE INDEX IF NOT EXISTS idx_incidencias_pdv_id
